@@ -1,4 +1,5 @@
 const { Trip, TripLocation, Vehicle, StopRequest, TripLink } = require('../models');
+const { Op } = require('sequelize');
 
 class TripService {
   // VEH-01: Iniciar viaje y registrar inicio de GPS
@@ -23,13 +24,11 @@ class TripService {
 
     const fecha_hora = new Date().toISOString();
 
-    // Actualizar última ubicación en el Viaje
     trip.ultima_latitud = latitud;
     trip.ultima_longitud = longitud;
     trip.fecha_ultima_ubicacion = fecha_hora;
     await trip.save();
 
-    // Guardar historial en UBICACION_VIAJE
     await TripLocation.create({
       id_viaje,
       latitud,
@@ -52,12 +51,73 @@ class TripService {
     return trip;
   }
 
+  // VIA-01: Vinculación del pasajero a un vehículo mediante código o QR
+  async linkToVehicle(data) {
+    const { codigo_vehiculo, id_usuario, metodo_vinculacion } = data;
+
+    // Buscar el vehículo de forma flexible (por identificador, patente o ID numérico)
+    const vehicle = await Vehicle.findOne({
+      where: {
+        [Op.or]: [
+          { identificador: codigo_vehiculo },
+          { patente: codigo_vehiculo },
+          ...(Number(codigo_vehiculo) ? [{ id_vehiculo: Number(codigo_vehiculo) }] : [])
+        ]
+      }
+    });
+
+    if (!vehicle) {
+      throw new Error(`El vehículo con código '${codigo_vehiculo}' no existe en la base de datos.`);
+    }
+
+    // Buscar si hay un viaje en curso
+    const activeTrip = await Trip.findOne({ where: { estado: 'en_curso' } });
+    if (!activeTrip) {
+      throw new Error('No hay ningún viaje en curso actualmente.');
+    }
+
+    // Desactivar vinculaciones previas activas de este usuario
+    await TripLink.update(
+      { activa: 0 },
+      { where: { id_usuario, activa: 1 } }
+    );
+
+    // Crear la nueva vinculación
+    const tripLink = await TripLink.create({
+      id_usuario,
+      id_viaje: activeTrip.id_viaje,
+      metodo_vinculacion: metodo_vinculacion || 'QR',
+      activa: 1,
+      fecha_vinculacion: new Date().toISOString()
+    });
+
+    return tripLink;
+  }
+
+  // VIA-02: Selección de destino y solicitud digital de parada
+  async requestStop(data) {
+    const { id_vinculacion, id_paradero } = data;
+
+    const link = await TripLink.findByPk(id_vinculacion);
+    if (!link || link.activa !== 1) {
+      throw new Error('La vinculación del pasajero no existe o ya no está activa.');
+    }
+
+    const stopRequest = await StopRequest.create({
+      id_vinculacion,
+      id_paradero,
+      estado: 'enviada',
+      fecha_solicitud: new Date().toISOString()
+    });
+
+    return stopRequest;
+  }
+
   // VEH-02: Recepción de alertas de parada agrupadas para el conductor
   async getPendingStopAlerts(id_viaje) {
     const trip = await Trip.findByPk(id_viaje);
     if (!trip) throw new Error('Viaje no encontrado.');
 
-    // Buscar solicitudes pendientes uniendo con vinculaciones activas de este viaje
     const alerts = await StopRequest.findAll({
       include: [{
         model: TripLink,
@@ -67,7 +127,6 @@ class TripService {
       where: { estado: ['enviada', 'proxima'] }
     });
 
-    // Agrupar solicitudes por id_paradero y contar cuántas hay
     const stopCounts = {};
     alerts.forEach(req => {
       const paraderoId = req.id_paradero;
