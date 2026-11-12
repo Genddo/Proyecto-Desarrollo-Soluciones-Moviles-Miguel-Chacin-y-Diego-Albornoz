@@ -5,6 +5,7 @@ const { sequelize } = require('./models');
 // Importar rutas de tus requerimientos
 const tripRoutes = require('./routes/trip.routes');
 const passengerTripRoutes = require('./routes/passengerTrip.routes');
+const authRoutes = require('./routes/auth.routes'); // <-- Añadido para ACC-03
 
 const createApp = () => {
   const app = express();
@@ -22,9 +23,10 @@ const createApp = () => {
     res.json({ status: 'OK', message: 'Servidor de VoyBus funcionando correctamente' });
   });
 
-  // Endpoints para tus 4 requerimientos (Conductor y Pasajero)
+  // Endpoints de la API
   app.use('/api/trips', tripRoutes);
   app.use('/api/passenger', passengerTripRoutes);
+  app.use('/api/auth', authRoutes); // <-- Añadido para ACC-03
 
   return app;
 };

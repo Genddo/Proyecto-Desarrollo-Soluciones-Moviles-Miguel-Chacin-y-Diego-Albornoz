@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 
+import ProfileScreen from './src/screens/ProfileScreen';
 import PassengerScreen from './src/screens/PassengerScreen';
 import DriverScreen from './src/screens/DriverScreen';
 import { COLORS } from './src/theme/colors';
@@ -28,6 +29,14 @@ function HomeScreen({ navigation }) {
       >
         <Text style={styles.buttonText}>Módulo Conductor (VEH-01 / VEH-02)</Text>
       </TouchableOpacity>
+
+      {/* Botón añadido para el requerimiento ACC-03 (Cerrar sesión / Perfil) */}
+      <TouchableOpacity 
+        style={[styles.button, { backgroundColor: COLORS.surface }]} 
+        onPress={() => navigation.navigate('Profile')}
+      >
+        <Text style={styles.buttonText}>Mi Perfil / Ajustes (ACC-03)</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -46,6 +55,8 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'VoyBus Inicio' }} />
         <Stack.Screen name="Passenger" component={PassengerScreen} options={{ title: 'Panel Pasajero' }} />
         <Stack.Screen name="Driver" component={DriverScreen} options={{ title: 'Panel Conductor' }} />
+        {/* Pantalla registrada para el requerimiento ACC-03 */}
+        <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil de Usuario' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
