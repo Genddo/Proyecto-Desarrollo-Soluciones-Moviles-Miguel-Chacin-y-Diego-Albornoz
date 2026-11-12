@@ -16,7 +16,7 @@ export default function DriverScreen() {
         longitud: -70.3980
       });
       setTripStarted(true);
-      Alert.alert('Éxito (VEH-01)', 'Viaje iniciado y ubicación GPS transmitida.');
+      Alert.alert('Éxito ', 'Viaje iniciado y ubicación GPS transmitida.');
       fetchAlerts();
     } catch (error) {
       Alert.alert('Error', error.response?.data?.error || 'No se pudo iniciar el viaje');
