@@ -1,9 +1,6 @@
 # Nombre del Proyecto
 Proyecto VoyBus
 
-## Equipo de Desarrollo
-Miguel Chacin y Diego Albornoz
-
 ## Descripcion
 
 ## Tecnologias Utilizadas
@@ -37,3 +34,4 @@ Demomento estamos ocupando:
 ## Pruebas
 
 ## Autor(es)
+Miguel Chacin y Diego Albornoz
