@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const createApp = require('./app');
 const sequelize = require('./config/database');
 
@@ -7,16 +9,23 @@ const app = createApp();
 const startServer = async () => {
   try {
     await sequelize.authenticate();
-    console.log('Conexión a la base de datos SQLite establecida con éxito.');
 
-    // Sincroniza los modelos (crea tablas si no existen)
+    console.log(
+      'Conexión a la base de datos SQLite establecida con éxito.'
+    );
+
     await sequelize.sync();
 
     app.listen(PORT, () => {
-      console.log(`Servidor corriendo en el puerto http://localhost:${PORT}`);
+      console.log(
+        `Servidor corriendo en http://localhost:${PORT}`
+      );
     });
   } catch (error) {
-    console.error('No se pudo conectar a la base de datos:', error);
+    console.error(
+      'No se pudo conectar a la base de datos:',
+      error
+    );
   }
 };
 

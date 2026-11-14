@@ -1,11 +1,13 @@
 const express = require('express');
 const cors = require('cors');
-const { sequelize } = require('./models');
 
-// Importar rutas de tus requerimientos
+// Rutas existentes
 const tripRoutes = require('./routes/trip.routes');
 const passengerTripRoutes = require('./routes/passengerTrip.routes');
-const authRoutes = require('./routes/auth.routes'); // <-- Añadido para ACC-03
+const authRoutes = require('./routes/auth.routes');
+
+// Rutas del módulo Red
+const redRoutes = require('./routes/red.routes');
 
 const createApp = () => {
   const app = express();
@@ -13,20 +15,23 @@ const createApp = () => {
   app.use(cors());
   app.use(express.json());
 
-  // Sincronizar los modelos con la base de datos SQLite
-  sequelize.sync({ alter: true })
-    .then(() => console.log('Modelos de Sequelize sincronizados correctamente con SQLite.'))
-    .catch(err => console.error('Error al sincronizar base de datos:', err));
-
-  // Ruta de prueba inicial para verificar que la API responde
+  // Ruta para verificar que la API está funcionando
   app.get('/api/health', (req, res) => {
-    res.json({ status: 'OK', message: 'Servidor de VoyBus funcionando correctamente' });
+    res.json({
+      status: 'OK',
+      message: 'Servidor de VoyBus funcionando correctamente'
+    });
   });
 
-  // Endpoints de la API
+  // Módulo de viajes y pasajero
   app.use('/api/trips', tripRoutes);
   app.use('/api/passenger', passengerTripRoutes);
-  app.use('/api/auth', authRoutes); // <-- Añadido para ACC-03
+
+  // Módulo de acceso
+  app.use('/api/auth', authRoutes);
+
+  // Módulo de red de transporte
+  app.use('/api/red', redRoutes);
 
   return app;
 };
