@@ -1,94 +1,129 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { COLORS } from '../theme/colors';
 import api from '../services/api';
 
 export default function ProfileScreen({ navigation }) {
-
   const handleLogout = () => {
     Alert.alert(
-      "Cerrar Sesión",
-      "¿Estás seguro de que deseas salir de tu cuenta?",
+      'Cerrar sesión',
+      '¿Estás seguro de que deseas salir de tu cuenta?',
       [
-        { 
-          text: "Cancelar", 
-          style: "cancel" 
+        {
+          text: 'Cancelar',
+          style: 'cancel',
         },
-        { 
-          text: "Sí, salir", 
-          style: "destructive",
+        {
+          text: 'Sí, salir',
+          style: 'destructive',
+
           onPress: async () => {
             try {
-              // Llamada al endpoint del backend que creamos (ACC-03)
+              // Informa al backend del cierre de sesión.
               await api.post('/auth/logout');
             } catch (error) {
-              console.log("Aviso: No se pudo contactar al servidor en el logout, procediendo localmente.");
+              // ACC-03 indica que el cierre local debe completarse
+              // incluso si no existe conexión con el servidor.
+              console.log(
+                'No se pudo contactar al servidor durante el logout.'
+              );
             }
 
-            // ACC-03: Restablecer la navegación para limpiar la pila 
-            // e impedir regresar a pantallas protegidas con el botón "atrás" del teléfono
+            // Elimina la sesión almacenada en el teléfono.
+            await AsyncStorage.multiRemove([
+              'voybus_token',
+              'voybus_user',
+            ]);
+
+            // Limpia toda la navegación y vuelve al acceso.
             navigation.reset({
               index: 0,
-              routes: [{ name: 'Home' }], // Asumiendo que 'Home' es tu menú principal
+              routes: [{ name: 'Login' }],
             });
-          } 
-        }
+          },
+        },
       ]
     );
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Mi Perfil / Configuración</Text>
-      
+      <Text style={styles.title}>
+        Mi Perfil / Configuración
+      </Text>
+
       <View style={styles.card}>
-        <Text style={styles.label}>Usuario: Pasajero VoyBus</Text>
-        <Text style={styles.label}>Correo: pasajero@voybus.cl</Text>
+        <Text style={styles.label}>
+          Usuario: Pasajero VoyBus
+        </Text>
+
+        <Text style={styles.label}>
+          Sesión iniciada
+        </Text>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={handleLogout}
+      >
+        <Text style={styles.logoutButtonText}>
+          Cerrar sesión
+        </Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    padding: 20, 
-    justifyContent: 'center', 
-    backgroundColor: COLORS.background 
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+    backgroundColor: COLORS.background,
   },
-  title: { 
-    fontSize: 24, 
-    fontWeight: 'bold', 
-    marginBottom: 20, 
-    textAlign: 'center', 
-    color: COLORS.text 
+
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: COLORS.text,
   },
-  card: { 
-    backgroundColor: COLORS.surface, 
-    padding: 20, 
-    borderRadius: 10, 
+
+  card: {
+    backgroundColor: COLORS.surface,
+    padding: 20,
+    borderRadius: 10,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: COLORS.text
+    borderColor: COLORS.text,
   },
-  label: { 
-    fontSize: 16, 
-    color: COLORS.text, 
-    marginBottom: 10 
+
+  label: {
+    fontSize: 16,
+    color: COLORS.text,
+    marginBottom: 10,
   },
-  logoutButton: { 
-    backgroundColor: '#D90429', // Color rojo institucional para salida
-    padding: 16, 
-    borderRadius: 10, 
-    alignItems: 'center' 
+
+  logoutButton: {
+    backgroundColor: '#D90429',
+    padding: 16,
+    borderRadius: 10,
+    alignItems: 'center',
   },
-  logoutButtonText: { 
-    color: '#FFFFFF', 
-    fontSize: 16, 
-    fontWeight: 'bold' 
-  }
+
+  logoutButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });

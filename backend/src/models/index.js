@@ -8,127 +8,157 @@ const TripLink = require('./tripLink.model');
 const StopRequest = require('./stopRequest.model');
 
 const Line = require('./line.model');
-const Route = require('./route.model');
 const Stop = require('./stop.model');
+const Route = require('./route.model');
 const RouteStop = require('./routeStop.model');
 
-/*
- * =========================================================
- * RELACIONES DEL MÓDULO RED DE TRANSPORTE
- * =========================================================
- */
+const StopFavorite = require('./stopFavorite.model');
 
-// Una línea puede tener varios recorridos.
+// =====================================================
+// RED DE TRANSPORTE
+// =====================================================
+
+// Una línea posee varios recorridos.
 Line.hasMany(Route, {
   foreignKey: 'id_linea',
-  as: 'recorridos'
+  as: 'recorridos',
 });
 
 Route.belongsTo(Line, {
   foreignKey: 'id_linea',
-  as: 'linea'
+  as: 'linea',
 });
 
-// Un recorrido puede tener varios paraderos ordenados.
+// Un recorrido posee paraderos ordenados.
 Route.hasMany(RouteStop, {
   foreignKey: 'id_recorrido',
-  as: 'paraderosRecorrido'
+  as: 'paraderosRecorrido',
 });
 
 RouteStop.belongsTo(Route, {
   foreignKey: 'id_recorrido',
-  as: 'recorrido'
+  as: 'recorrido',
 });
 
 // Un paradero puede pertenecer a varios recorridos.
 Stop.hasMany(RouteStop, {
   foreignKey: 'id_paradero',
-  as: 'recorridosParadero'
+  as: 'recorridosParadero',
 });
 
 RouteStop.belongsTo(Stop, {
   foreignKey: 'id_paradero',
-  as: 'paradero'
+  as: 'paradero',
 });
 
-// Un recorrido puede tener varios viajes.
+// =====================================================
+// VIAJES Y VEHÍCULOS
+// =====================================================
+
 Route.hasMany(Trip, {
   foreignKey: 'id_recorrido',
-  as: 'viajes'
+  as: 'viajes',
 });
 
 Trip.belongsTo(Route, {
   foreignKey: 'id_recorrido',
-  as: 'recorrido'
+  as: 'recorrido',
 });
 
-// Un vehículo puede realizar varios viajes en distintos momentos.
 Vehicle.hasMany(Trip, {
   foreignKey: 'id_vehiculo',
-  as: 'viajes'
+  as: 'viajes',
 });
 
 Trip.belongsTo(Vehicle, {
   foreignKey: 'id_vehiculo',
-  as: 'vehiculo'
+  as: 'vehiculo',
 });
 
-/*
- * =========================================================
- * RELACIONES DE VIAJES, UBICACIÓN Y PASAJEROS
- * =========================================================
- */
+// =====================================================
+// UBICACIÓN Y VINCULACIÓN DE PASAJEROS
+// =====================================================
 
 Trip.hasMany(TripLocation, {
-  foreignKey: 'id_viaje'
+  foreignKey: 'id_viaje',
 });
 
 TripLocation.belongsTo(Trip, {
-  foreignKey: 'id_viaje'
+  foreignKey: 'id_viaje',
 });
 
 Trip.hasMany(TripLink, {
-  foreignKey: 'id_viaje'
+  foreignKey: 'id_viaje',
 });
 
 TripLink.belongsTo(Trip, {
-  foreignKey: 'id_viaje'
+  foreignKey: 'id_viaje',
 });
 
 User.hasMany(TripLink, {
-  foreignKey: 'id_usuario'
+  foreignKey: 'id_usuario',
 });
 
 TripLink.belongsTo(User, {
-  foreignKey: 'id_usuario'
+  foreignKey: 'id_usuario',
 });
 
 TripLink.hasMany(StopRequest, {
-  foreignKey: 'id_vinculacion'
+  foreignKey: 'id_vinculacion',
 });
 
 StopRequest.belongsTo(TripLink, {
-  foreignKey: 'id_vinculacion'
+  foreignKey: 'id_vinculacion',
 });
 
 Stop.hasMany(StopRequest, {
-  foreignKey: 'id_paradero'
+  foreignKey: 'id_paradero',
 });
 
 StopRequest.belongsTo(Stop, {
-  foreignKey: 'id_paradero'
+  foreignKey: 'id_paradero',
+});
+
+// =====================================================
+// PARADEROS FAVORITOS
+// =====================================================
+
+// Un usuario puede guardar varios paraderos favoritos.
+User.hasMany(StopFavorite, {
+  foreignKey: 'id_usuario',
+  as: 'paraderosFavoritos',
+});
+
+StopFavorite.belongsTo(User, {
+  foreignKey: 'id_usuario',
+  as: 'usuario',
+});
+
+// Un paradero puede ser favorito de varios usuarios.
+Stop.hasMany(StopFavorite, {
+  foreignKey: 'id_paradero',
+  as: 'favoritos',
+});
+
+StopFavorite.belongsTo(Stop, {
+  foreignKey: 'id_paradero',
+  as: 'paradero',
 });
 
 module.exports = {
   sequelize,
+
   User,
   Vehicle,
   Trip,
   TripLocation,
   TripLink,
   StopRequest,
+
   Line,
-  Route,
   Stop,
-  RouteStop
+  Route,
+  RouteStop,
+
+  StopFavorite,
 };
