@@ -20,7 +20,7 @@ async function seedDatabase() {
 
     /*
      * =========================================================
-     * 1. USUARIO DEMO
+     * 1. USUARIOS DEMO (PASAJERO Y CONDUCTOR)
      * =========================================================
      */
 
@@ -33,6 +33,20 @@ async function seedDatabase() {
       telefono: '+56911111111',
       password_hash: passwordHash,
       rol: 'pasajero',
+      estado: 'activo',
+      intentos_fallidos: 0,
+      bloqueado_hasta: null
+    });
+
+    const conductorPasswordHash = await bcrypt.hash('Chofer123!', 10);
+
+    await User.create({
+      id_usuario: 2,
+      nombre: 'Conductor Demo',
+      correo: 'conductor@voybus.cl',
+      telefono: '+56922222222',
+      password_hash: conductorPasswordHash,
+      rol: 'conductor',
       estado: 'activo',
       intentos_fallidos: 0,
       bloqueado_hasta: null
@@ -418,7 +432,8 @@ async function seedDatabase() {
     console.log('10 paraderos creados.');
     console.log('10 vehículos creados.');
     console.log('3 viajes activos y 1 viaje finalizado creados.');
-    console.log('Usuario demo: user@voybus.cl / Clave123!');
+    console.log('Usuario pasajero demo: user@voybus.cl / Clave123!');
+    console.log('Usuario conductor demo: conductor@voybus.cl / Chofer123!');
 
     process.exit(0);
   } catch (error) {
